@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { 
   Home, Calculator, Camera, ShoppingBag, PieChart as PieChartIcon, 
-  Settings, HelpCircle, Search, Bell, UploadCloud, MapPin, X, Menu
+  Settings, HelpCircle, Search, Bell, UploadCloud, MapPin, X, Menu,
+  ChevronRight
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
@@ -39,7 +40,7 @@ const dummyImages = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('impact');
+  const [activeTab, setActiveTab] = useState('home'); // default to home
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Demand State
@@ -69,7 +70,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (activeTab === 'market') fetchListings();
+    if (activeTab === 'market' || activeTab === 'home') fetchListings();
   }, [activeTab]);
 
   const handleDemandSubmit = async (e) => {
@@ -134,16 +135,19 @@ export default function App() {
 
   const getTabColor = () => {
     switch (activeTab) {
+      case 'home': return 'bg-emerald-600';
       case 'demand': return 'bg-blue-600';
       case 'freshness': return 'bg-purple-600';
       case 'market': return 'bg-orange-500';
       case 'impact': return 'bg-emerald-600';
+      case 'settings': return 'bg-gray-800';
+      case 'help': return 'bg-gray-800';
       default: return 'bg-gray-800';
     }
   };
 
   const navItems = [
-    { id: 'home', icon: Home, label: 'Home' },
+    { id: 'home', icon: Home, label: 'Home Dashboard' },
     { id: 'demand', icon: Calculator, label: 'Demand Predictor' },
     { id: 'freshness', icon: Camera, label: 'Freshness Checker' },
     { id: 'market', icon: ShoppingBag, label: 'Surplus Marketplace' },
@@ -162,7 +166,7 @@ export default function App() {
       <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-100 flex flex-col justify-between z-50 transform transition-transform duration-300 md:relative md:w-64 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div>
           <div className="p-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
               <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">🍃</div>
               <span className="text-2xl font-black tracking-tight text-gray-800">FoodFlow</span>
             </div>
@@ -190,16 +194,22 @@ export default function App() {
             <div className="pt-6 pb-2">
               <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Preferences</p>
             </div>
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-all">
-              <Settings size={20} /> <span className="font-semibold text-sm">Settings</span>
+            <button 
+              onClick={() => { setActiveTab('settings'); setIsMobileMenuOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'settings' ? 'bg-gray-800 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}`}
+            >
+              <Settings size={20} strokeWidth={activeTab === 'settings' ? 2.5 : 2}/> <span className={`font-semibold text-sm ${activeTab === 'settings' ? 'font-bold' : ''}`}>Settings</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-all">
-              <HelpCircle size={20} /> <span className="font-semibold text-sm">Help & Support</span>
+            <button 
+              onClick={() => { setActiveTab('help'); setIsMobileMenuOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'help' ? 'bg-gray-800 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}`}
+            >
+              <HelpCircle size={20} strokeWidth={activeTab === 'help' ? 2.5 : 2}/> <span className={`font-semibold text-sm ${activeTab === 'help' ? 'font-bold' : ''}`}>Help & Support</span>
             </button>
           </nav>
         </div>
 
-        <div className="p-6 mt-auto">
+        <div className="p-6 mt-auto hidden md:block">
           <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-2xl border border-emerald-200 relative overflow-hidden">
             <h3 className="text-emerald-800 font-black text-lg leading-tight z-10 relative">Good Food<br/>Brighter<br/>Tomorrows</h3>
             <div className="absolute -bottom-4 -right-4 text-6xl opacity-30">🍃</div>
@@ -226,8 +236,8 @@ export default function App() {
               <Bell size={22} className="text-gray-600" />
               <span className="absolute top-1 right-2 w-2 h-2 bg-orange-500 rounded-full border-2 border-white"></span>
             </div>
-            <div className="flex items-center gap-3 cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center font-bold text-sm shadow-md">S</div>
+            <div onClick={() => setActiveTab('settings')} className="flex items-center gap-3 cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center font-bold text-sm shadow-md">SA</div>
               <div className="hidden sm:block">
                 <p className="text-sm font-bold text-gray-800 leading-tight">Siddhant</p>
                 <p className="text-xs font-medium text-gray-500">Admin</p>
@@ -242,39 +252,181 @@ export default function App() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-50 to-transparent opacity-50 pointer-events-none rounded-full blur-3xl -z-10"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-emerald-50 to-transparent opacity-50 pointer-events-none rounded-full blur-3xl -z-10"></div>
 
-          {/* PAGE TITLE */}
-          <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-            <div>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-                {activeTab === 'impact' && 'Impact Dashboard'}
-                {activeTab === 'demand' && 'Demand Predictor'}
-                {activeTab === 'freshness' && 'Freshness Checker'}
-                {activeTab === 'market' && 'Surplus Marketplace'}
-                {activeTab === 'home' && 'Welcome Back, Siddhant 👋'}
-              </h1>
-              <p className="text-gray-500 font-medium mt-1">
-                {activeTab === 'impact' && 'Turning Surplus into Smiles 🍃'}
-                {activeTab === 'demand' && 'Predict food demand and reduce future waste using AI'}
-                {activeTab === 'freshness' && 'Upload food images to check freshness using AI'}
-                {activeTab === 'market' && 'Buy, resell or donate surplus food to reduce waste'}
-              </p>
-            </div>
-            
-            {activeTab === 'impact' && (
-              <div className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors w-full md:w-auto justify-center">
-                <span>🗓 Jan 2024 - Jun 2024</span>
+          {/* PAGE TITLE (Hide on Home) */}
+          {activeTab !== 'home' && (
+            <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+              <div>
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+                  {activeTab === 'impact' && 'Impact Dashboard'}
+                  {activeTab === 'demand' && 'Demand Predictor'}
+                  {activeTab === 'freshness' && 'Freshness Checker'}
+                  {activeTab === 'market' && 'Surplus Marketplace'}
+                  {activeTab === 'settings' && 'Account Settings'}
+                  {activeTab === 'help' && 'Help & Support'}
+                </h1>
+                <p className="text-gray-500 font-medium mt-1">
+                  {activeTab === 'impact' && 'Turning Surplus into Smiles 🍃'}
+                  {activeTab === 'demand' && 'Predict food demand and reduce future waste using AI'}
+                  {activeTab === 'freshness' && 'Upload food images to check freshness using AI'}
+                  {activeTab === 'market' && 'Buy, resell or donate surplus food to reduce waste'}
+                  {activeTab === 'settings' && 'Manage your profile and application preferences'}
+                  {activeTab === 'help' && 'Find answers and contact our technical team'}
+                </p>
               </div>
-            )}
-            {activeTab === 'market' && (
-              <button className="w-full md:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
-                <span>+</span> Add Item
-              </button>
-            )}
-          </div>
+              
+              {activeTab === 'impact' && (
+                <div className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors w-full md:w-auto justify-center">
+                  <span>🗓 Jan 2024 - Jun 2024</span>
+                </div>
+              )}
+              {activeTab === 'market' && (
+                <button className="w-full md:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
+                  <span>+</span> Add Item
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* --- TAB: HOME DASHBOARD --- */}
+          {activeTab === 'home' && (
+            <div className="space-y-6 animate-fade-in-up">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl p-8 md:p-12 text-white shadow-lg relative overflow-hidden">
+                <div className="relative z-10 w-full md:w-2/3">
+                  <h2 className="text-3xl md:text-5xl font-black mb-4">Welcome back, Siddhant! 👋</h2>
+                  <p className="text-emerald-50 text-lg mb-8 font-medium">Ready to turn today's surplus into smiles? Choose an action below to get started and monitor your impact.</p>
+                  <div className="flex flex-wrap gap-4">
+                    <button onClick={() => setActiveTab('demand')} className="bg-white text-emerald-700 px-6 py-3 rounded-xl font-bold shadow-md hover:bg-emerald-50 transition-colors flex items-center gap-2">
+                      <Calculator size={18} /> Predict Demand
+                    </button>
+                    <button onClick={() => setActiveTab('freshness')} className="bg-emerald-600/30 backdrop-blur text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-600/50 transition-colors border border-emerald-400 flex items-center gap-2">
+                      <Camera size={18} /> Scan Produce
+                    </button>
+                  </div>
+                </div>
+                <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none hidden md:block">
+                  <span className="text-9xl absolute right-10 top-1/2 -translate-y-1/2">🍃</span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div onClick={() => setActiveTab('market')} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md cursor-pointer transition-all group">
+                  <div className="w-12 h-12 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><ShoppingBag /></div>
+                  <h3 className="font-bold text-gray-800 text-lg flex items-center justify-between">Marketplace <ChevronRight size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors"/></h3>
+                  <p className="text-gray-500 text-sm mt-2 font-medium">Manage live donations and discounted resale listings.</p>
+                </div>
+                <div onClick={() => setActiveTab('impact')} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md cursor-pointer transition-all group">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><PieChartIcon /></div>
+                  <h3 className="font-bold text-gray-800 text-lg flex items-center justify-between">Impact Dashboard <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors"/></h3>
+                  <p className="text-gray-500 text-sm mt-2 font-medium">View detailed analytics and environmental impact.</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                  <h3 className="font-bold text-gray-800 text-lg mb-4">Live Statistics</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-50">
+                      <span className="text-sm font-bold text-gray-500">Active Listings</span>
+                      <span className="font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">{listings.filter(l => l.status === 'Available').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-50">
+                      <span className="text-sm font-bold text-gray-500">Claimed / Pending</span>
+                      <span className="font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">{listings.filter(l => l.status === 'Claimed').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-gray-500">Total Items in DB</span>
+                      <span className="font-black text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">{listings.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* --- TAB: SETTINGS --- */}
+          {activeTab === 'settings' && (
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10 max-w-4xl mx-auto animate-fade-in-up">
+               <div className="space-y-10">
+                  <div>
+                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-6">Profile Information</h3>
+                     <div className="flex items-center gap-6">
+                        <div className="w-24 h-24 bg-gray-900 rounded-full text-white font-black text-3xl flex items-center justify-center shadow-lg">SA</div>
+                        <div>
+                          <p className="font-black text-2xl text-gray-800">Siddhant Admin</p>
+                          <p className="text-gray-500 font-medium mb-3">siddhant@foodflow.ai</p>
+                          <button className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors">Change Avatar</button>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <hr className="border-gray-100" />
+                  
+                  <div>
+                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-6">Application Preferences</h3>
+                     <div className="space-y-6">
+                        <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                          <div>
+                            <p className="font-bold text-gray-800 text-lg">Push Notifications</p>
+                            <p className="text-sm text-gray-500 font-medium">Receive alerts when an NGO claims your surplus food.</p>
+                          </div>
+                          <div className="w-14 h-7 bg-emerald-500 rounded-full relative cursor-pointer shadow-inner">
+                            <div className="absolute right-1 top-1 w-5 h-5 bg-white rounded-full shadow-sm"></div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                          <div>
+                            <p className="font-bold text-gray-800 text-lg">Dark Mode</p>
+                            <p className="text-sm text-gray-500 font-medium">Switch to a dark UI theme (Coming Soon).</p>
+                          </div>
+                          <div className="w-14 h-7 bg-gray-300 rounded-full relative cursor-not-allowed shadow-inner">
+                            <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow-sm"></div>
+                          </div>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <button className="w-full md:w-auto bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-emerald-200 hover:bg-emerald-700 transition-colors">Save Settings</button>
+                  </div>
+               </div>
+            </div>
+          )}
+
+          {/* --- TAB: HELP & SUPPORT --- */}
+          {activeTab === 'help' && (
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10 max-w-4xl mx-auto animate-fade-in-up">
+               <div className="space-y-8">
+                 <div>
+                   <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-6">Frequently Asked Questions</h3>
+                   <div className="space-y-4">
+                     <div className="border border-gray-100 bg-gray-50 rounded-2xl p-5 hover:border-blue-200 transition-colors">
+                       <p className="font-black text-gray-800 text-lg mb-2">How does the Freshness Checker work?</p>
+                       <p className="text-sm text-gray-600 leading-relaxed font-medium">It uses a custom MobileNetV2 AI model built in Python. When you upload an image, the model analyzes the pixels for signs of spoilage and returns a confidence score to determine if it is fit for resale or donation.</p>
+                     </div>
+                     <div className="border border-gray-100 bg-gray-50 rounded-2xl p-5 hover:border-blue-200 transition-colors">
+                       <p className="font-black text-gray-800 text-lg mb-2">Who pays for the delivery routing map?</p>
+                       <p className="text-sm text-gray-600 leading-relaxed font-medium">Currently, the routing is powered by Leaflet and the free OSRM (Open Source Routing Machine) API. This means there are absolutely no billing limits or API keys required during this MVP phase!</p>
+                     </div>
+                     <div className="border border-gray-100 bg-gray-50 rounded-2xl p-5 hover:border-blue-200 transition-colors">
+                       <p className="font-black text-gray-800 text-lg mb-2">How accurate is the Demand Predictor?</p>
+                       <p className="text-sm text-gray-600 leading-relaxed font-medium">The Random Forest Regressor was trained on historical Food Demand Forecasting datasets. Its accuracy will improve over time as you log more daily batches into the system.</p>
+                     </div>
+                   </div>
+                 </div>
+                 
+                 <hr className="border-gray-100" />
+                 
+                 <div>
+                   <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-6">Contact Us</h3>
+                   <button className="w-full bg-gray-800 text-white py-4 rounded-xl font-bold hover:bg-gray-900 transition-colors flex items-center justify-center gap-2 shadow-lg">
+                      <HelpCircle size={20} /> Open a Support Ticket
+                   </button>
+                 </div>
+               </div>
+            </div>
+          )}
 
           {/* --- TAB: IMPACT DASHBOARD --- */}
           {activeTab === 'impact' && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in-up">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                   { title: 'Meals Saved', value: '1,420', sub: '↑ 24% from last month', color: 'emerald', icon: '🍴' },
@@ -352,7 +504,7 @@ export default function App() {
 
           {/* --- TAB: DEMAND PREDICTOR --- */}
           {activeTab === 'demand' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start animate-fade-in-up">
               <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-xl">📦</div>
@@ -435,7 +587,7 @@ export default function App() {
 
           {/* --- TAB: FRESHNESS CHECKER --- */}
           {activeTab === 'freshness' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start animate-fade-in-up">
               <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 h-full flex flex-col">
                 <div className="flex-1 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors relative p-6 min-h-[250px]" onClick={() => fileInputRef.current.click()}>
                   <UploadCloud size={48} className="text-blue-500 mb-4" />
@@ -506,7 +658,7 @@ export default function App() {
 
           {/* --- TAB: SURPLUS MARKETPLACE --- */}
           {activeTab === 'market' && (
-            <div>
+            <div className="animate-fade-in-up">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 overflow-x-auto pb-2">
                 <div className="flex gap-2 whitespace-nowrap">
                   <button className="bg-orange-500 text-white px-5 py-2 rounded-full font-bold text-sm shadow-sm">All</button>
