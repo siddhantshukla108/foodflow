@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { 
   Home, Calculator, Camera, ShoppingBag, PieChart as PieChartIcon, 
-  Settings, HelpCircle, Search, Bell, UploadCloud, MapPin, X
+  Settings, HelpCircle, Search, Bell, UploadCloud, MapPin, X, Menu
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
@@ -32,14 +32,15 @@ const pieData = [
 const PIE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#6B7280'];
 
 const dummyImages = [
-  'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&q=80', // Potatoes
-  'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&q=80', // Tomatoes
-  'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&q=80', // Carrots
-  'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80', // Bread
+  'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&q=80',
+  'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&q=80',
+  'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&q=80',
+  'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80',
 ];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('impact');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Demand State
   const [formData, setFormData] = useState({ center_id: 55, meal_id: 1993, quantity_prepared: 500 });
@@ -131,7 +132,6 @@ export default function App() {
     setMapLoading(false);
   };
 
-  // UI Theme Colors mapping based on active tab
   const getTabColor = () => {
     switch (activeTab) {
       case 'demand': return 'bg-blue-600';
@@ -139,16 +139,6 @@ export default function App() {
       case 'market': return 'bg-orange-500';
       case 'impact': return 'bg-emerald-600';
       default: return 'bg-gray-800';
-    }
-  };
-
-  const getTabTextColor = () => {
-    switch (activeTab) {
-      case 'demand': return 'text-blue-600';
-      case 'freshness': return 'text-purple-600';
-      case 'market': return 'text-orange-500';
-      case 'impact': return 'text-emerald-600';
-      default: return 'text-gray-800';
     }
   };
 
@@ -163,22 +153,32 @@ export default function App() {
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
       
+      {/* MOBILE OVERLAY */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-gray-900/50 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+      )}
+
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-gray-100 flex flex-col justify-between hidden md:flex">
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-100 flex flex-col justify-between z-50 transform transition-transform duration-300 md:relative md:w-64 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div>
-          <div className="p-6 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">🍃</div>
-            <span className="text-2xl font-black tracking-tight text-gray-800">FoodFlow</span>
+          <div className="p-6 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">🍃</div>
+              <span className="text-2xl font-black tracking-tight text-gray-800">FoodFlow</span>
+            </div>
+            <button className="md:hidden text-gray-500" onClick={() => setIsMobileMenuOpen(false)}>
+              <X size={24} />
+            </button>
           </div>
           
-          <nav className="px-4 mt-4 space-y-1">
+          <nav className="px-4 mt-2 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button 
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? `${getTabColor()} text-white shadow-md shadow-opacity-20` : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}`}
                 >
                   <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
@@ -187,7 +187,7 @@ export default function App() {
               )
             })}
             
-            <div className="pt-8 pb-2">
+            <div className="pt-6 pb-2">
               <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Preferences</p>
             </div>
             <button className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-all">
@@ -199,8 +199,7 @@ export default function App() {
           </nav>
         </div>
 
-        {/* Sidebar Bottom Banner */}
-        <div className="p-6">
+        <div className="p-6 mt-auto">
           <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-2xl border border-emerald-200 relative overflow-hidden">
             <h3 className="text-emerald-800 font-black text-lg leading-tight z-10 relative">Good Food<br/>Brighter<br/>Tomorrows</h3>
             <div className="absolute -bottom-4 -right-4 text-6xl opacity-30">🍃</div>
@@ -212,19 +211,24 @@ export default function App() {
       <main className="flex-1 flex flex-col overflow-hidden relative">
         
         {/* TOP HEADER */}
-        <header className="h-20 bg-white/50 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 z-10">
-          <div className="flex items-center bg-gray-100 px-4 py-2.5 rounded-full w-96 border border-transparent focus-within:bg-white focus-within:border-gray-300 transition-colors">
-            <Search size={18} className="text-gray-400" />
-            <input type="text" placeholder="Search anything..." className="bg-transparent border-none outline-none ml-3 w-full text-sm font-medium text-gray-700 placeholder-gray-400" />
+        <header className="h-20 bg-white/50 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 md:px-8 z-10">
+          <div className="flex items-center gap-4">
+            <button className="md:hidden text-gray-600 p-2 hover:bg-gray-100 rounded-lg" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu size={24} />
+            </button>
+            <div className="hidden md:flex items-center bg-gray-100 px-4 py-2.5 rounded-full w-96 border border-transparent focus-within:bg-white focus-within:border-gray-300 transition-colors">
+              <Search size={18} className="text-gray-400" />
+              <input type="text" placeholder="Search anything..." className="bg-transparent border-none outline-none ml-3 w-full text-sm font-medium text-gray-700 placeholder-gray-400" />
+            </div>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="relative cursor-pointer hover:bg-gray-100 p-2 rounded-full transition-colors">
+          <div className="flex items-center gap-4 md:gap-6">
+            <div className="relative cursor-pointer hover:bg-gray-100 p-2 rounded-full transition-colors hidden sm:block">
               <Bell size={22} className="text-gray-600" />
               <span className="absolute top-1 right-2 w-2 h-2 bg-orange-500 rounded-full border-2 border-white"></span>
             </div>
             <div className="flex items-center gap-3 cursor-pointer">
               <div className="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center font-bold text-sm shadow-md">S</div>
-              <div>
+              <div className="hidden sm:block">
                 <p className="text-sm font-bold text-gray-800 leading-tight">Siddhant</p>
                 <p className="text-xs font-medium text-gray-500">Admin</p>
               </div>
@@ -233,14 +237,13 @@ export default function App() {
         </header>
 
         {/* SCROLLABLE CONTENT */}
-        <div className="flex-1 overflow-y-auto p-8 relative">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 relative">
           
-          {/* Dashboard specific background decors based on tabs */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-50 to-transparent opacity-50 pointer-events-none rounded-full blur-3xl -z-10"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-emerald-50 to-transparent opacity-50 pointer-events-none rounded-full blur-3xl -z-10"></div>
 
           {/* PAGE TITLE */}
-          <div className="mb-8 flex justify-between items-end">
+          <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
               <h1 className="text-3xl font-black text-gray-900 tracking-tight">
                 {activeTab === 'impact' && 'Impact Dashboard'}
@@ -258,12 +261,12 @@ export default function App() {
             </div>
             
             {activeTab === 'impact' && (
-              <div className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors">
+              <div className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 shadow-sm flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors w-full md:w-auto justify-center">
                 <span>🗓 Jan 2024 - Jun 2024</span>
               </div>
             )}
             {activeTab === 'market' && (
-              <button className="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 transition-colors flex items-center gap-2">
+              <button className="w-full md:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
                 <span>+</span> Add Item
               </button>
             )}
@@ -272,8 +275,7 @@ export default function App() {
           {/* --- TAB: IMPACT DASHBOARD --- */}
           {activeTab === 'impact' && (
             <div className="space-y-6">
-              {/* Top Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                   { title: 'Meals Saved', value: '1,420', sub: '↑ 24% from last month', color: 'emerald', icon: '🍴' },
                   { title: 'Food Rescued', value: '320 kg', sub: '↑ 18% from last month', color: 'blue', icon: '📦' },
@@ -293,21 +295,20 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Charts Row */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                  <div className="flex justify-between items-center mb-6">
+                <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <h2 className="text-lg font-black text-gray-800">Food Saved Over Time (Meals)</h2>
-                    <select className="bg-gray-50 border border-gray-200 text-sm font-bold text-gray-600 rounded-lg px-3 py-1 outline-none">
+                    <select className="bg-gray-50 border border-gray-200 text-sm font-bold text-gray-600 rounded-lg px-3 py-1 outline-none w-full sm:w-auto">
                       <option>Meals Saved</option>
                     </select>
                   </div>
-                  <div className="h-72">
+                  <div className="h-72 w-full -ml-4 sm:ml-0">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={impactData} margin={{top: 20, right: 20, left: -20, bottom: 0}}>
+                      <LineChart data={impactData} margin={{top: 20, right: 20, left: 0, bottom: 0}}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12, fontWeight: 600}} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12, fontWeight: 600}} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12, fontWeight: 600}} width={40} />
                         <RechartsTooltip contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
                         <Line type="monotone" dataKey="mealsSaved" stroke="#3B82F6" strokeWidth={4} dot={{r: 6, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 8}} />
                       </LineChart>
@@ -316,8 +317,8 @@ export default function App() {
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
-                  <h2 className="text-lg font-black text-gray-800 mb-2">Redistribution Breakdown</h2>
-                  <div className="flex-1 flex flex-col justify-center relative">
+                  <h2 className="text-lg font-black text-gray-800 mb-2 text-center sm:text-left">Redistribution Breakdown</h2>
+                  <div className="flex-1 flex flex-col justify-center relative mt-4">
                     <div className="h-48 relative">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -332,14 +333,14 @@ export default function App() {
                         <span className="text-xs font-bold text-gray-400">Total Meals</span>
                       </div>
                     </div>
-                    <div className="mt-6 space-y-3">
+                    <div className="mt-6 space-y-3 px-4">
                       {pieData.map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full" style={{backgroundColor: PIE_COLORS[i]}}></span>
-                            <span className="font-semibold text-gray-600">{item.name}</span>
+                            <span className="w-3 h-3 rounded-full flex-shrink-0" style={{backgroundColor: PIE_COLORS[i]}}></span>
+                            <span className="font-semibold text-gray-600 truncate">{item.name}</span>
                           </div>
-                          <span className="font-bold text-gray-800">{item.value}%</span>
+                          <span className="font-bold text-gray-800 ml-2">{item.value}%</span>
                         </div>
                       ))}
                     </div>
@@ -352,7 +353,7 @@ export default function App() {
           {/* --- TAB: DEMAND PREDICTOR --- */}
           {activeTab === 'demand' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+              <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-xl">📦</div>
                   <h2 className="text-xl font-black text-gray-800">Log Today's Batch</h2>
@@ -362,7 +363,7 @@ export default function App() {
                   <div>
                     <label className="block text-sm font-bold text-gray-600 mb-2">Expected Attendance</label>
                     <div className="relative">
-                      <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-12 font-bold text-gray-800 outline-none focus:border-blue-500 transition-colors" value={formData.center_id} onChange={e => setFormData({...formData, center_id: e.target.value})} required />
+                      <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-16 font-bold text-gray-800 outline-none focus:border-blue-500 transition-colors" value={formData.center_id} onChange={e => setFormData({...formData, center_id: e.target.value})} required />
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">👥</span>
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">people</span>
                     </div>
@@ -370,7 +371,7 @@ export default function App() {
                   <div>
                     <label className="block text-sm font-bold text-gray-600 mb-2">Meals Prepared ID</label>
                     <div className="relative">
-                      <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-12 font-bold text-gray-800 outline-none focus:border-blue-500 transition-colors" value={formData.meal_id} onChange={e => setFormData({...formData, meal_id: e.target.value})} required />
+                      <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-12 font-bold text-gray-800 outline-none focus:border-blue-500 transition-colors" value={formData.meal_id} onChange={e => setFormData({...formData, meal_id: e.target.value})} required />
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🍴</span>
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">id</span>
                     </div>
@@ -378,7 +379,7 @@ export default function App() {
                   <div>
                     <label className="block text-sm font-bold text-gray-600 mb-2">Quantity Prepared (kg)</label>
                     <div className="relative">
-                      <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-12 font-bold text-gray-800 outline-none focus:border-blue-500 transition-colors" value={formData.quantity_prepared} onChange={e => setFormData({...formData, quantity_prepared: e.target.value})} required />
+                      <input type="number" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-12 font-bold text-gray-800 outline-none focus:border-blue-500 transition-colors" value={formData.quantity_prepared} onChange={e => setFormData({...formData, quantity_prepared: e.target.value})} required />
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">⚖️</span>
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">kg</span>
                     </div>
@@ -390,21 +391,21 @@ export default function App() {
               </div>
 
               {demandResult && (
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-full animate-fade-in-up">
+                <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-full animate-fade-in-up">
                   <div className="flex justify-between items-start mb-8">
                     <h2 className="text-xl font-black text-gray-800">AI Forecast Result</h2>
                     <span className="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-md flex items-center gap-1">✨ AI Powered</span>
                   </div>
                   
-                  <div className="flex items-center gap-6 mb-8">
-                    <div className="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                  <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 text-center sm:text-left">
+                    <div className="w-16 h-16 flex-shrink-0 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
                       <Calculator size={28} />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-bold text-gray-500 mb-1">Estimated Demand</p>
-                      <p className="text-4xl font-black text-gray-900 tracking-tight">{demandResult.predicted_demand} <span className="text-sm text-gray-400 font-bold ml-1">meals needed</span></p>
+                      <p className="text-4xl font-black text-gray-900 tracking-tight">{demandResult.predicted_demand} <span className="text-sm text-gray-400 font-bold ml-1">meals</span></p>
                     </div>
-                    <div className="ml-auto bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-2xl text-center">
+                    <div className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-2xl text-center w-full sm:w-auto">
                       <p className="text-emerald-600 font-black text-lg">↓ {demandResult.expected_surplus}</p>
                       <p className="text-xs font-bold text-emerald-700 mt-1">Surplus Detected</p>
                     </div>
@@ -412,7 +413,7 @@ export default function App() {
 
                   <div className="mb-8">
                     <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{width: `${Math.min(100, (demandResult.predicted_demand / formData.quantity_prepared) * 100)}%`}}></div>
+                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{width: `${Math.min(100, (demandResult.predicted_demand / formData.quantity_prepared) * 100)}%`}}></div>
                     </div>
                     <div className="flex justify-between mt-2 text-sm font-bold text-gray-500">
                       <span>Prepared: {formData.quantity_prepared}</span>
@@ -421,7 +422,7 @@ export default function App() {
                   </div>
 
                   <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex gap-4 items-start">
-                    <span className="text-xl">💡</span>
+                    <span className="text-xl shrink-0">💡</span>
                     <div>
                       <h4 className="font-black text-blue-900 mb-1">AI Insight</h4>
                       <p className="text-sm text-blue-800 font-medium leading-relaxed">Based on historical data, you can reduce preparation by approximately {demandResult.expected_surplus} meals today. {demandResult.reuse_suggestion}</p>
@@ -435,10 +436,10 @@ export default function App() {
           {/* --- TAB: FRESHNESS CHECKER --- */}
           {activeTab === 'freshness' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 h-full flex flex-col">
-                <div className="flex-1 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors relative" onClick={() => fileInputRef.current.click()}>
+              <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 h-full flex flex-col">
+                <div className="flex-1 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors relative p-6 min-h-[250px]" onClick={() => fileInputRef.current.click()}>
                   <UploadCloud size={48} className="text-blue-500 mb-4" />
-                  <p className="font-bold text-gray-700 text-lg mb-1">Drop or click to upload food image</p>
+                  <p className="font-bold text-gray-700 text-lg mb-1 text-center">Drop or click to upload</p>
                   <p className="text-sm font-medium text-gray-400">Supports JPG, PNG (Max 5MB)</p>
                   {imagePreview && <img src={imagePreview} className="absolute inset-0 w-full h-full object-cover rounded-2xl z-10 p-1" />}
                 </div>
@@ -446,9 +447,9 @@ export default function App() {
                 
                 <div className="mt-8">
                   <p className="text-sm font-bold text-gray-500 mb-3">Try with:</p>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 overflow-x-auto pb-2">
                     {[1,2,3,4].map(i => (
-                      <div key={i} className="w-16 h-16 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden cursor-pointer hover:border-purple-500 transition-colors">
+                      <div key={i} className="w-16 h-16 flex-shrink-0 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden cursor-pointer hover:border-purple-500 transition-colors">
                          <img src={dummyImages[i-1]} className="w-full h-full object-cover" />
                       </div>
                     ))}
@@ -463,7 +464,7 @@ export default function App() {
               </div>
 
               {freshnessResult && (
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full animate-fade-in-up">
+                <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full animate-fade-in-up">
                   <div className="relative h-48 rounded-2xl overflow-hidden mb-8 shadow-sm">
                     <img src={imagePreview} className="w-full h-full object-cover" />
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
@@ -472,14 +473,14 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="flex gap-8 mb-8">
+                  <div className="flex flex-col sm:flex-row gap-8 mb-8">
                     <div className="flex-1 flex items-center justify-center flex-col">
                       <h3 className="text-sm font-bold text-gray-500 mb-4">Freshness Score</h3>
                       <div className="relative w-32 h-32 rounded-full border-[12px] border-emerald-500 flex items-center justify-center shadow-inner">
                         <span className="text-4xl font-black text-gray-800">{freshnessResult.confidence.split('.')[0]}%</span>
                       </div>
                     </div>
-                    <div className="flex-1 space-y-6 flex flex-col justify-center">
+                    <div className="flex-1 space-y-6 flex flex-col justify-center items-center sm:items-start text-center sm:text-left">
                       <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Estimated Shelf Life</p>
                         <p className="text-lg font-black text-gray-800">{freshnessResult.status === 'Fresh' ? '2 - 3 days' : 'Expired'}</p>
@@ -492,7 +493,7 @@ export default function App() {
                   </div>
 
                   <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex gap-4 items-center mt-auto">
-                    <span className="text-2xl">💡</span>
+                    <span className="text-2xl shrink-0">💡</span>
                     <div>
                       <h4 className="font-black text-blue-900 mb-1">AI Suggestion</h4>
                       <p className="text-sm text-blue-800 font-medium">Looks {freshnessResult.status.toLowerCase()}! Suitable for {freshnessResult.status === 'Fresh' ? 'resale.' : 'compost.'}</p>
@@ -506,23 +507,21 @@ export default function App() {
           {/* --- TAB: SURPLUS MARKETPLACE --- */}
           {activeTab === 'market' && (
             <div>
-              {/* Filters */}
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 overflow-x-auto pb-2">
+                <div className="flex gap-2 whitespace-nowrap">
                   <button className="bg-orange-500 text-white px-5 py-2 rounded-full font-bold text-sm shadow-sm">All</button>
                   <button className="bg-white text-gray-600 px-5 py-2 rounded-full font-bold text-sm border border-gray-200 hover:bg-gray-50">Fresh</button>
                   <button className="bg-white text-gray-600 px-5 py-2 rounded-full font-bold text-sm border border-gray-200 hover:bg-gray-50">Near Expiry</button>
-                  <button className="bg-white text-gray-600 px-5 py-2 rounded-full font-bold text-sm border border-gray-200 hover:bg-gray-50">Donation</button>
-                  <button className="bg-white text-gray-600 px-5 py-2 rounded-full font-bold text-sm border border-gray-200 hover:bg-gray-50">Resale</button>
+                  <button className="bg-white text-gray-600 px-5 py-2 rounded-full font-bold text-sm border border-gray-200 hover:bg-gray-50 hidden md:block">Donation</button>
+                  <button className="bg-white text-gray-600 px-5 py-2 rounded-full font-bold text-sm border border-gray-200 hover:bg-gray-50 hidden md:block">Resale</button>
                 </div>
-                <div className="flex items-center gap-2 text-sm font-bold text-gray-600">
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 whitespace-nowrap">
                   <span>Sort by</span>
                   <select className="bg-transparent border-b border-gray-300 outline-none pb-1"><option>Relevance</option></select>
                 </div>
               </div>
 
-              {/* Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {listings.map((l, i) => (
                   <div key={l._id} className="bg-white rounded-3xl p-3 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden group">
                     <div className="relative h-40 rounded-2xl overflow-hidden mb-4">
@@ -535,7 +534,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className="px-2 pb-2 flex-1 flex flex-col">
-                      <h3 className="font-black text-gray-800 text-lg leading-tight mb-1">{l.itemName}</h3>
+                      <h3 className="font-black text-gray-800 text-lg leading-tight mb-1 truncate">{l.itemName}</h3>
                       <p className="text-sm font-bold text-gray-500 mb-1">{l.quantity} kg</p>
                       <p className="text-xs font-medium text-gray-400 mb-4">{l.condition === 'Fresh' ? 'Cooked Surplus' : 'Processing Byproduct'}</p>
                       
@@ -556,21 +555,20 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Map Modal */}
               {activeRoute && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-8 bg-gray-900/40 backdrop-blur-sm animate-fade-in">
-                  <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-                    <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-gray-900/40 backdrop-blur-sm animate-fade-in">
+                  <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-full">
+                    <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center">
                       <div>
-                        <h2 className="text-2xl font-black text-gray-800 mb-1">Live Tracking Route</h2>
-                        <p className="text-sm font-bold text-gray-500">Kitchen to {activeRoute.claimedBy}</p>
+                        <h2 className="text-xl md:text-2xl font-black text-gray-800 mb-1">Live Tracking Route</h2>
+                        <p className="text-xs md:text-sm font-bold text-gray-500">Kitchen to {activeRoute.claimedBy}</p>
                       </div>
-                      <button onClick={() => setActiveRoute(null)} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+                      <button onClick={() => setActiveRoute(null)} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors shrink-0">
                         <X size={20} />
                       </button>
                     </div>
-                    <div className="h-[500px] w-full relative">
-                      {mapLoading && <div className="absolute inset-0 z-[1000] bg-white/70 flex items-center justify-center font-bold text-gray-500">Calculating Fastest Route...</div>}
+                    <div className="h-[400px] md:h-[500px] w-full relative">
+                      {mapLoading && <div className="absolute inset-0 z-[1000] bg-white/70 flex items-center justify-center font-bold text-gray-500">Calculating Route...</div>}
                       <MapContainer center={KITCHEN_COORDS} zoom={13} style={{ height: '100%', width: '100%' }}>
                         <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
                         <Marker position={KITCHEN_COORDS}><Popup>Kitchen (Origin)</Popup></Marker>
